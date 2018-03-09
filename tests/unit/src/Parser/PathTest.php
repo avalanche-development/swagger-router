@@ -9,7 +9,6 @@ use ReflectionClass;
 
 class PathTest extends PHPUnit_Framework_TestCase
 {
-
     public function testImplementsParserInterface()
     {
         $mockRequest = $this->createMock(RequestInterface::class);

@@ -6,7 +6,6 @@ use Psr\Http\Message\RequestInterface as Request;
 
 class Path implements ParserInterface
 {
-
     use ExplodeTrait;
 
     /** @var Request */
