@@ -9,7 +9,6 @@ use ReflectionClass;
 
 class PathTest extends PHPUnit_Framework_TestCase
 {
-
     public function testImplementsParserInterface()
     {
         $mockRequest = $this->createMock(RequestInterface::class);
@@ -172,6 +171,48 @@ class PathTest extends PHPUnit_Framework_TestCase
             ->method('explodeValue')
             ->with(implode(',', $expectedValue))
             ->willReturn($expectedValue);
+
+        $reflectedRequest->setValue($pathParser, $mockRequest);
+        $reflectedParameter->setValue($pathParser, $mockParameter);
+        $reflectedRoute->setValue($pathParser, $mockRoute);
+
+        $result = $pathParser->getValue();
+
+        $this->assertEquals($expectedValue, $result);
+    }
+
+    public function testGetValueReturnsSingleValueIfMatchedMultiplePaths()
+    {
+        $expectedValue = '1234';
+
+        $mockUri = $this->createMock(UriInterface::class);
+        $mockUri->method('getPath')
+            ->willReturn("/path/{$expectedValue}/another/one");
+
+        $mockRequest = $this->createMock(RequestInterface::class);
+        $mockRequest->method('getUri')
+            ->willReturn($mockUri);
+
+        $mockParameter = [
+            'name' => 'id',
+            'type' => 'string',
+        ];
+        $mockRoute = '/path/{id}/another/{one}';
+
+        $reflectedPathParser = new ReflectionClass(Path::class);
+        $reflectedRequest = $reflectedPathParser->getProperty('request');
+        $reflectedRequest->setAccessible(true);
+        $reflectedParameter = $reflectedPathParser->getProperty('parameter');
+        $reflectedParameter->setAccessible(true);
+        $reflectedRoute = $reflectedPathParser->getProperty('route');
+        $reflectedRoute->setAccessible(true);
+
+        $pathParser = $this->getMockBuilder(Path::class)
+            ->disableOriginalConstructor()
+            ->setMethods([ 'explodeValue' ])
+            ->getMock();
+        $pathParser->expects($this->never())
+            ->method('explodeValue');
 
         $reflectedRequest->setValue($pathParser, $mockRequest);
         $reflectedParameter->setValue($pathParser, $mockParameter);
